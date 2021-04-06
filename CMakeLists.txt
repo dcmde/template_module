@@ -19,12 +19,20 @@ endif ()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 ############# Message type #############
-find_package(std_msgs REQUIRED)
+# With standard string
+#find_package(std_msgs REQUIRED)
+# With custom message
+find_package(rosidl_default_generators REQUIRED)
 
 ############# Add other package #############
 #find_package(communication_module REQUIRED)
 
 include_directories(include/template_module)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+        "msg/CustomMsg.msg"
+        )
+
 
 set(dependencies
         "rclcpp"
@@ -38,13 +46,17 @@ set(SOURCES
         src/template_module.cpp
         src/TemplateNode.cpp)
 
-add_executable(template_module ${SOURCES})
-ament_target_dependencies(template_module ${dependencies})
-target_include_directories(template_module PUBLIC
+add_executable(tmpl_module ${SOURCES})
+ament_target_dependencies(tmpl_module ${dependencies})
+
+# Custom message
+rosidl_target_interfaces(tmpl_module ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
+target_include_directories(tmpl_module PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
-install(TARGETS template_module
+install(TARGETS tmpl_module
         DESTINATION lib/${PROJECT_NAME})
 
 if (BUILD_TESTING)
